@@ -7,6 +7,7 @@ canvas.height = window.innerHeight -7.1;
 
 let c = canvas.getContext("2d");
 let gravity = 0.5;
+let bullets = [];
 
 // let height=150;
 class character {
@@ -69,21 +70,61 @@ class blocks {
 }
 
 class gun {
-    constructor({position}) {
+    constructor({position,pivote}) {
         this.position = position;
         this.width = 100;
         this.height = 20;
+        this.pivote = pivote;
+        this.rotationAngle = 0;
     }
 
     draw(){
+        c.save();
+        c.translate(this.pivote.x, this.pivote.y)
+        c.rotate(this.rotationAngle * Math.PI / 180)
+        c.translate(-this.pivote.x, -this.pivote.y);
         c.fillStyle = "green";
         c.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const bullet = bullets[i];
+            bullet.update();
+            bullet.draw();
+            if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+                bullets.splice(i, 1);
+              }
+            }
+        c.restore();
     }
 
     update() {
         this.draw();
         // this.position.x += this.velocity.x;
         // this.position.y += this.velocity.y;
+    }
+}
+let i=0;
+class bullet {
+    constructor(x, y, angle, velY) {
+        this.x = x;
+        this.y = y;
+        this.velY= velY;
+        this.angle = angle;
+        this.speed = 5;
+    }
+
+    draw() {
+        c.fillStyle = 'black';
+        c.fillRect(this.x - 2, this.y - 2, 4, 4);
+    }
+    
+    update() {
+        if(this.y + this.height + this.velY >= canvas.height){
+                this.velY = 0;
+            } 
+            else this.velY += gravity;
+            // this.y += 20;//* Math.sin(this.angle);
+            this.x += this.speed; //* Math.cos(this.angle);
     }
 }
 
@@ -102,7 +143,11 @@ const gun1 = new gun ({
     position: {
         x: player.position.x + 50,
         y: 600
-    }
+    },
+    pivote: {
+        x: player.position.x,
+        y: 600
+     }
 })
 
 const box1 = new blocks ({
@@ -197,6 +242,16 @@ function animate (){
     
 animate();
 
+
+function fireBullet() {
+    let bulletX = gun1.position.x + gun1.width //* Math.cos(gun1.rotationAngle * Math.PI / 180);
+    let bulletY = gun1.position.y + gun1.height / 2 //* Math.sin(gun1.rotationAngle * Math.PI / 180);
+    let velY = gun1.position.y + 0;
+    // let bulletAngle = gun1.rotationAngle * Math.PI / 180;
+    bullets.push(new bullet(bulletX, bulletY,velY))
+}
+
+
 window.addEventListener("keydown", (event) => {
     switch (event.key) {
         case 'd': 
@@ -212,6 +267,15 @@ window.addEventListener("keydown", (event) => {
             keys.w.pressed = true;
             player.velocity.y = -18;
             break
+        case 'ArrowLeft':
+            gun1.rotationAngle -= 5; 
+            break;
+        case 'ArrowRight':
+            gun1.rotationAngle += 5;
+            break;
+        case 'f':
+            fireBullet();
+            break;
     }
 })
 
@@ -229,3 +293,6 @@ window.addEventListener("keyup", (event) => {
             break;
     } 
 })
+
+
+  
