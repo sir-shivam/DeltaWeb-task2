@@ -6,7 +6,7 @@
 'https://sir-shivam.github.io/DeltaWeb-task2/'
 
 # steps 
-1. create one zombie and a player
+1. <strikethrough>create one zombie and a player</strikethrough>
 2. move character
 3. gravity
 4. other required concepts 

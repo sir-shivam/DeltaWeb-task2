@@ -391,7 +391,6 @@ function animate (){
     
     
 animate();
-
 let interval1 = setInterval(() => {
     if(!pause){
     jombieArrival();
