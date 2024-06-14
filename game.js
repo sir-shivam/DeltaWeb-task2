@@ -9,6 +9,7 @@ let c = canvas.getContext("2d");
 let gravity = 0.999;
 let bullets = [];
 let jombies = [];
+let blockss = [];
 // let height=150;
 class character {
     constructor({position , velocity}){
@@ -23,6 +24,24 @@ class character {
         //     height: 50
         // }
     }
+
+    isCollidingWithBlock(b) {
+        return (
+          this.position.x < b.position.x + b.width &&
+          this.position.x + this.width > b.position.x &&
+          this.position.y < b.position.y + b.height &&
+          this.position.y + this.height > b.position.y
+        );
+      }
+
+    isCollidingWithBlocks() {
+        for (const b of blockss) {
+          if (this.isCollidingWithBlock(b)) {
+            return true; 
+        }
+        }
+        return false; 
+      }
 
     draw() {
         c.fillStyle = "red";
@@ -40,7 +59,14 @@ class character {
             this.velocity.y = 0;
         } 
         else this.velocity.y += gravity; 
-    }
+
+        if(player.isCollidingWithBlocks()){
+            console.log("touching");
+            // player.position.x -=2;
+            player.velocity.x = 0;
+            player.velocity.y = 0;
+        }
+}
 }
 
 class blocks {
@@ -118,6 +144,47 @@ class jombie {
         this.height = 80;
     }
 
+    isCollidingWith(jombi2) {
+        for(const j of jombies){
+            if(j != jombi2){
+                let test =
+                 (
+                    jombi2.position.x < j.position.x + j.width &&
+                    jombi2.position.x + jombi2.width > j.position.x &&
+                    jombi2.position.y < j.position.y + j.height &&
+                    jombi2.position.y + jombi2.height > j.position.y
+                  );
+
+                if(test){
+                    if(jombi2.position.x < canvas.width/2){
+                    jombi2.position.x -= 1;}
+                    else {
+                    jombi2.position.x += 1;
+                    }
+                    // j.position.x -= 1;
+                    return true;
+                }
+            }
+        }
+      }
+    
+    isCollideJombie(){
+        for (const jombi2 of jombies) {
+            if(this.isCollidingWith(jombi2)){
+                return true;
+            }
+            else {
+                if(jombi2.position.x < canvas.width/2){
+                    jombi2.velocity.x = 1;}
+                    else {
+                    jombi2.velocity.x = -1;
+                    } 
+
+            }
+        }
+        return false;
+    }
+
     create() {
         c.fillStyle = "gray";
         c.fillRect(this.position.x, this.position.y, this.width, this.height);
@@ -130,6 +197,10 @@ class jombie {
             } 
         else this.velocity.y += gravity; 
         this.position.y += this.velocity.y;
+
+        if(this.isCollideJombie()){
+            console.log("touching jombie");
+        }
 
         this.create();
     }
@@ -154,8 +225,8 @@ class bullet {
         this.x = x;
         this.y = y;
         this.angle = angle;    
-        this.dx = Math.cos(angle) * 26;
-        this.dy = Math.sin(angle) * 26;
+        this.dx = Math.cos(angle + 0.05) * 26;
+        this.dy = Math.sin(angle + 0.05) * 26;
     }
 
     move() {
@@ -169,7 +240,7 @@ class bullet {
 
     draw() {
         c.fillStyle = 'black';
-        c.fillRect(this.x - 2, this.y - 2, 4, 4);
+        c.fillRect(this.x - 2, this.y - 2, 10, 10);
     }
 }
 
@@ -236,6 +307,8 @@ const box4 = new blocks ({
     }
 })
 
+blockss = [box1,box2,box3,box4];
+
 const keys = {
     a: {
         pressed: false
@@ -276,22 +349,12 @@ function animate (){
         box4.velocity.y = 0; 
     }
 
-    if (playerCollide()){
-        console.log("touch");
-        // player.position.x = player.position.x;
-        player.velocity.y =0;
-        player.velocity.x = 0;
-    }
-
     jombies.forEach(jom => {
         if(jombieCollide(jom)){
             console.log ("jombi");
             jom.velocity.x = 0;
             }
 
-        if(collideBetween(jom)){
-            jom.velocity.x = 0;
-        }
         jom.move();
     })
 
@@ -303,6 +366,7 @@ animate();
 let interval1 = setInterval(() => {
     jombieArrival();    
 }, 5000);
+// clearInterval(interval1);
 
 
 
@@ -310,8 +374,8 @@ let interval1 = setInterval(() => {
 function fireBullet() {
     distance = 45 + gun1.width;
     let angle = gun1.rotationAngle * Math.PI / 180;
-    let delX = distance * Math.cos(angle);
-    let delY = distance * Math.sin(angle);
+    let delX = distance * Math.cos(angle + 0.05);
+    let delY = distance * Math.sin(angle + 0.05);
     let bulletX = gun1.pivote.x + delX;
     let bulletY = gun1.pivote.y + delY;
     
@@ -320,20 +384,19 @@ function fireBullet() {
 }
 
 function jombieArrival(){
-    if(Math.random()*10 > 5){
+    if(jombies.length < 5){
     jombies.push(new jombie ({
         position:{
             x: numBtw(-200 , 200),
             y: numBtw(0,500),
         },
         velocity:{
-            x: 0.1,
+            x: 1,
             y: 0
         }
-    }))
-    }
+    }))}
 
-    else {
+    if(jombies.length<10 && jombies.length>1){
         jombies.push(new jombie ({
             position:{
                 x: numBtw(1200,1300) ,
@@ -343,8 +406,7 @@ function jombieArrival(){
                 x: -1,
                 y: 0
             }
-        }))
-    }
+        })) }
 }
 
 
@@ -382,82 +444,37 @@ function collide(bullet) {
     return (test1 || test2 || test3 || test4);
 }
 
-function playerCollide() {
-    let test1 = 
-    (   player.position.x + player.width >= box1.position.x &&
-        player.position.x + player.width <= box1.position.x + box1.width &&
-        player.position.y + player.height >= box1.position.y &&
-        player.position.y + player.height <= box1.position.y + box1.height
-    )
-    
-    let test2 = 
-    (   player.position.x + player.width >= box2.position.x &&
-        player.position.x + player.width <= box2.position.x + box2.width &&
-        player.position.y + player.height >= box2.position.y &&
-        player.position.y + player.height <= box2.position.y + box2.height   
-    )
-
-    let test3 = 
-    (   player.position.x  >= box3.position.x &&
-        player.position.x  <= box3.position.x + box3.width &&
-        player.position.y + player.height >= box3.position.y &&
-        player.position.y + player.height <= box3.position.y + box3.height    
-    )
-
-    let test4 = 
-    (   player.position.x  >= box4.position.x &&
-        player.position.x  <= box4.position.x + box4.width &&
-        player.position.y + player.height >= box4.position.y &&
-        player.position.y + player.height <= box4.position.y + box4.height    
-    )
-    return(test1 || test2 || test3 || test4);
-}
-
 function jombieCollide(jom) {
     let test1 = 
-    (   jom.position.x  >= box1.position.x &&
-        jom.position.x  <= box1.position.x + box1.width &&
-        jom.position.y + jom.height >= box1.position.y &&
-        jom.position.y + jom.height <= box1.position.y + box1.height
+    (   jom.position.x < box1.position.x + box1.width &&
+        jom.position.x + jom.width > box1.position.x &&
+        jom.position.y < box1.position.y + box1.height &&
+        jom.position.y + jom.height > box1.position.y  
     )
     
     let test2 = 
-    (   jom.position.x  >= box2.position.x &&
-        jom.position.x  <= box2.position.x + box2.width &&
-        jom.position.y + jom.height >= box2.position.y &&
-        jom.position.y + jom.height <= box2.position.y + box2.height   
+    (    jom.position.x < box2.position.x + box2.width &&
+        jom.position.x + jom.width > box2.position.x &&
+        jom.position.y < box2.position.y + box2.height &&
+        jom.position.y + jom.height > box2.position.y  
     )
 
     let test3 = 
-    (   jom.position.x + jom.width  >= box3.position.x &&
-        jom.position.x + jom.width <= box3.position.x + box3.width &&
-        jom.position.y  >= box3.position.y //&&
-        // jombie1.position.y + jombie1.height <= box3.position.y + box3.height    
+    (     jom.position.x < box3.position.x + box3.width &&
+          jom.position.x + jom.width > box3.position.x &&
+          jom.position.y < box3.position.y + box3.height &&
+          jom.position.y + jom.height > box3.position.y  
     )
 
     let test4 = 
-    (   jom.position.x  + jom.width >= box4.position.x &&
-        jom.position.x  + jom.width <= box4.position.x + box4.width &&
-        jom.position.y + jom.height >= box4.position.y &&
-        jom.position.y + jom.height <= box4.position.y + box4.height
+    (    jom.position.x < box3.position.x + box3.width &&
+        jom.position.x + jom.width > box3.position.x &&
+        jom.position.y < box3.position.y + box3.height &&
+        jom.position.y + jom.height > box4.position.y  
     )
     return(test1 || test2 || test3 || test4);
 }
 
-function collideBetween(jom) {
-    let test1;
-        jombies.forEach(jom1 => {
-        test1 = (
-        jom.position.x >= jom1.position.x &&
-        jom.position.x  + jom.width <= jom1.position.x + jom1.width &&
-        jom.position.y >= jom1.position.y &&
-        jom.position.y + jom.height <= jom1.position.y + jom1.height)
-
-        if(test1){
-            return(test1);
-        }
-    })
-}
 
 function hit (bullet){
     for(let jom2 =0 ; jom2 < jombies.length ; jom2++  ) {
