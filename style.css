@@ -7,3 +7,69 @@
 canvas{
     background-color: antiquewhite;
 }
+
+.displayArea{
+    position: relative;
+    width: 100vw;
+    /* height: 80px; */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* background-color: white; */
+}
+
+.feature {
+    position: absolute;
+    height: 60px;
+    width: 100px;
+    border: 0.5px solid #6bc0ee;
+    border-radius: 0.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 150px;
+    font-weight: 600;
+    font-size: larger;
+    backdrop-filter: blur(5px);
+    stroke-width: 6px;
+    stroke: #009FFD;
+    stroke-dashoffset: -220;
+    transition: 1s all ease;
+    /* color: #042c5f; */
+    text-shadow: 5px 5px 10px #7d8fd8;
+    /* box-shadow: 2px 5px 15px #e3efef; */
+}
+
+.feature:hover{
+    backdrop-filter: blur(100px);
+    border: 3px solid black;
+}   
+
+.play{
+    margin-left: 25vw;
+}
+
+.score{
+    margin-left: 55vw;
+    padding: 4px;
+    width: 140px;
+    height: 56px;
+}
+
+.three{
+    margin-left: 2vw;
+}
+
+.leader{
+    margin-left: 85vw;
+    width: 150px;
+}
+.score2{
+    width: auto;
+    height: 100%;
+    display: flex;
+    margin-left: 2px;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+}

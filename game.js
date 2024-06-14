@@ -1,4 +1,4 @@
-console.log("Code Run");
+//console.log("Code Run");
 
 let canvas = document.querySelector("canvas");
 
@@ -7,7 +7,7 @@ canvas.height = window.innerHeight;
 
 const backgroundImage=new Image();
 backgroundImage.src='./Assets/images/background.jpeg';
-console.log(backgroundImage);
+//console.log(backgroundImage);
 
 function drawBackground() {
     c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height );
@@ -15,11 +15,10 @@ function drawBackground() {
 
 const boy = new Image();
 boy.src='./Assets/images/player.png';
-console.log(boy);
+
 
 const enemy = new Image();
 enemy.src='./Assets/images/zombie.jpeg';
-
 
 let c = canvas.getContext("2d");
 let gravity = 0.999;
@@ -32,8 +31,8 @@ class character {
     constructor({position , velocity}){
         this.position = position;
         this.velocity = velocity;
-        this.height = 200;
-        this.width = 80;
+        this.height = 300;
+        this.width = 150;
         this.lastKey;
         // this.box = {
         //     position: this.position,
@@ -79,7 +78,7 @@ class character {
         else this.velocity.y += gravity; 
 
         if(player.isCollidingWithBlocks()){
-            console.log("touching");
+            //console.log("touching");
             // player.position.x -=2;
             player.velocity.x = 0;
             player.velocity.y = 0;
@@ -100,7 +99,7 @@ class blocks {
         c.strokeStyle = "black";
         c.stroke();
         c.fillRect(this.position.x, this.position.y, this.width, this.height);
-        // console.log("done");
+        // //console.log("done");
     }
 
     update() {
@@ -140,7 +139,7 @@ class gun {
                 bullets.splice(i, 1);
                }
             else if(collide(bullet)){
-                console.log("collide");
+                //console.log("collide");
                 bullets.splice(i, 1);
             }
             
@@ -218,7 +217,7 @@ class jombie {
         this.position.y += this.velocity.y;
 
         if(this.isCollideJombie()){
-            console.log("touching jombie");
+            //console.log("touching jombie");
         }
 
         this.create();
@@ -340,8 +339,11 @@ const keys = {
     }
 }
 
+let pause = false;
+
 function animate (){
-    window.requestAnimationFrame(animate);
+    if (!pause){
+    window.requestAnimationFrame(animate);}
     c.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
 
@@ -372,7 +374,7 @@ function animate (){
 
     jombies.forEach(jom => {
         if(jombieCollide(jom)){
-            console.log ("jombi");
+            //console.log ("jombi");
             jom.velocity.x = 0;
             }
 
@@ -385,7 +387,9 @@ function animate (){
 animate();
 
 let interval1 = setInterval(() => {
-    jombieArrival();    
+    if(!pause){
+    jombieArrival();
+    }
 }, 5000);
 // clearInterval(interval1);
 
@@ -400,7 +404,7 @@ function fireBullet() {
     let bulletX = gun1.pivote.x + delX;
     let bulletY = gun1.pivote.y + delY;
     
-    console.log(angle , gun1.rotationAngle);
+    //console.log(angle , gun1.rotationAngle);
     bullets.push(new bullet(bulletX, bulletY, angle))
 }
 
@@ -430,12 +434,10 @@ function jombieArrival(){
         })) }
 }
 
-
 // random values
 function numBtw(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }  
-
 
 function collide(bullet) {
     let test1 = 
@@ -506,12 +508,14 @@ function hit (bullet){
         bullet.y >= jombies[jom2].position.y &&
         bullet.y <= jombies[jom2].position.y + jombies[jom2].height
         )
-        console.log(test);
+        //console.log(test);
 
         if(test){
             bullets.splice(i, 1);
             jombies.splice(jom2,1);
             score++;
+            let score2 = document.querySelector(".score2");
+            score2.innerHTML = `${score}`;
             console.log("+1");
             }
     }
@@ -556,4 +560,44 @@ window.addEventListener("keyup", (event) => {
     } 
 })
 
-window.addEventListener("click" , fireBullet );
+canvas.addEventListener("click" , fireBullet );
+
+// feature functions
+
+let features = document.querySelectorAll(".feature");
+features.forEach((f)=> {
+    f.style.marginTop = "150px";
+    f.style.transition = "transform 0.5s ease-out"
+})
+
+let down = false;
+let interval = setInterval(() => {
+    console.log("transalate");
+    if(!down){
+        features.forEach((f)=> {
+            f.style.transform = "translate(0px,8px)";
+        })
+        down = true;
+    }
+    else {
+        features.forEach((f)=> {
+            f.style.transform = "translate(0px,-8px)";
+        })
+        down = false;
+    }
+}, 500);
+
+let play = document.querySelector(".play");
+
+play.addEventListener("click" , ()=> {
+    if(!pause){
+        play.innerHTML=`<i class="fa-solid fa-play"></i>`;
+        pause= true;
+    }
+
+    else {
+        play.innerHTML=`<i class="fa-solid fa-pause"></i>`;
+        pause= false;
+        animate();
+    }
+})
