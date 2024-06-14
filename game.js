@@ -2,8 +2,8 @@
 
 let canvas = document.querySelector("canvas");
 
-canvas.width = window.innerWidth ;
-canvas.height = window.innerHeight;
+canvas.width = window.innerWidth - 1.7 ;
+canvas.height = window.innerHeight - 4.1;
 
 const backgroundImage=new Image();
 backgroundImage.src='./Assets/images/background.jpeg';
@@ -16,9 +16,14 @@ function drawBackground() {
 const boy = new Image();
 boy.src='./Assets/images/player.png';
 
+const stone = new Image();
+stone.src =`./Assets/images/stone.png`;
 
 const enemy = new Image();
-enemy.src='./Assets/images/zombie.jpeg';
+enemy.src='./Assets/images/jombie.png';
+
+const enemy1 = new Image();
+enemy1.src='./Assets/images/jombie1.png';
 
 let c = canvas.getContext("2d");
 let gravity = 0.999;
@@ -90,15 +95,16 @@ class blocks {
     constructor({position , velocity}){
         this.position = position;
         this.velocity = velocity;
-        this.height = 100;
-        this.width = 100;
+        this.height = 120;
+        this.width = 120;
     }
 
     draw() {
         c.fillStyle = "pink";
         c.strokeStyle = "black";
-        c.stroke();
-        c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        // c.stroke();
+        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        c.drawImage(stone,this.position.x, this.position.y, this.width, this.height);
         // //console.log("done");
     }
 
@@ -153,12 +159,12 @@ class gun {
 }
 
 class jombie {
-    constructor ({position,velocity}) {
+    constructor ({position,velocity, image}) {
         this.position = position;
         this.velocity = velocity;
-        // this.speed = 10;
-        this.width = 50;
-        this.height = 80;
+        this.image = image;
+        this.width = 100;
+        this.height = 200;
     }
 
     isCollidingWith(jombi2) {
@@ -205,7 +211,7 @@ class jombie {
     create() {
         // c.fillStyle = "gray";
         // c.fillRect(this.position.x, this.position.y, this.width, this.height);
-        c.drawImage(enemy,this.position.x, this.position.y, this.width, this.height);
+        c.drawImage(this.image,this.position.x, this.position.y, this.width, this.height);
     }
     
     move(){
@@ -418,7 +424,9 @@ function jombieArrival(){
         velocity:{
             x: 1,
             y: 0
-        }
+        },
+        image: enemy1
+
     }))}
 
     if(jombies.length<10 && jombies.length>1){
@@ -430,7 +438,8 @@ function jombieArrival(){
             velocity:{
                 x: -1,
                 y: 0
-            }
+            },
+            image: enemy
         })) }
 }
 
