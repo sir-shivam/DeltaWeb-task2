@@ -2,11 +2,28 @@ console.log("Code Run");
 
 let canvas = document.querySelector("canvas");
 
-canvas.width = window.innerWidth -7.1;
-canvas.height = window.innerHeight -7.1;
+canvas.width = window.innerWidth ;
+canvas.height = window.innerHeight;
+
+const backgroundImage=new Image();
+backgroundImage.src='./Assets/images/background.jpeg';
+console.log(backgroundImage);
+
+function drawBackground() {
+    c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height );
+}
+
+const boy = new Image();
+boy.src='./Assets/images/player.png';
+console.log(boy);
+
+const enemy = new Image();
+enemy.src='./Assets/images/zombie.jpeg';
+
 
 let c = canvas.getContext("2d");
 let gravity = 0.999;
+let score = 0;
 let bullets = [];
 let jombies = [];
 let blockss = [];
@@ -15,8 +32,8 @@ class character {
     constructor({position , velocity}){
         this.position = position;
         this.velocity = velocity;
-        this.height = 150;
-        this.width = 50;
+        this.height = 200;
+        this.width = 80;
         this.lastKey;
         // this.box = {
         //     position: this.position,
@@ -45,7 +62,8 @@ class character {
 
     draw() {
         c.fillStyle = "red";
-        c.fillRect(this.position.x , this.position.y ,this.width, this.height)
+        c.drawImage(boy,this.position.x , this.position.y ,this.width, this.height);
+        // c.fillRect(this.position.x , this.position.y ,this.width, this.height);
         // c.fillStyle = "green"
         // c.fillRect(this.box.position.x, this.box.position.y, this.box.width, this.box.height)
     }
@@ -55,7 +73,7 @@ class character {
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
 
-        if(this.position.y + this.height + this.velocity.y >= canvas.height){
+        if(this.position.y + this.height + this.velocity.y >= canvas.height - 100){
             this.velocity.y = 0;
         } 
         else this.velocity.y += gravity; 
@@ -89,7 +107,7 @@ class blocks {
         this.draw();
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
-        if(this.position.y + this.height + this.velocity.y >= canvas.height){
+        if(this.position.y + this.height + this.velocity.y >= canvas.height - 100){
             this.velocity.y = 0;
         } 
         else this.velocity.y += gravity; 
@@ -118,7 +136,7 @@ class gun {
             bullet.move();
             bullet.draw();
 
-            if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+            if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height ) {
                 bullets.splice(i, 1);
                }
             else if(collide(bullet)){
@@ -186,13 +204,14 @@ class jombie {
     }
 
     create() {
-        c.fillStyle = "gray";
-        c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        // c.fillStyle = "gray";
+        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        c.drawImage(enemy,this.position.x, this.position.y, this.width, this.height);
     }
     
     move(){
         this.position.x += this.velocity.x;
-        if(this.position.y + this.height + this.velocity.y >= canvas.height){
+        if(this.position.y + this.height + this.velocity.y >= canvas.height - 100){
             this.velocity.y = 0;
             } 
         else this.velocity.y += gravity; 
@@ -232,7 +251,7 @@ class bullet {
     move() {
         this.x += this.dx;
         this.y += this.dy;
-        if(this.y <= canvas.height){
+        if(this.y <= canvas.height - 100){
             this.dy += gravity;
         } 
     }
@@ -324,6 +343,8 @@ const keys = {
 function animate (){
     window.requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+
     player.update();
     gun1.update();
     box1.update();
@@ -388,7 +409,7 @@ function jombieArrival(){
     jombies.push(new jombie ({
         position:{
             x: numBtw(-200 , 200),
-            y: numBtw(0,500),
+            y: numBtw(0,300),
         },
         velocity:{
             x: 1,
@@ -399,8 +420,8 @@ function jombieArrival(){
     if(jombies.length<10 && jombies.length>1){
         jombies.push(new jombie ({
             position:{
-                x: numBtw(1200,1300) ,
-                y: numBtw(0,500),
+                x: numBtw(1250,1350) ,
+                y: numBtw(0,300),
             },
             velocity:{
                 x: -1,
@@ -488,10 +509,10 @@ function hit (bullet){
         console.log(test);
 
         if(test){
-            // console.log("return",bullet);
             bullets.splice(i, 1);
             jombies.splice(jom2,1);
-        // return(test);
+            score++;
+            console.log("+1");
             }
     }
 }
