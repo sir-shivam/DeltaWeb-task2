@@ -48,6 +48,9 @@ canvas{
 .play{
     margin-left: 25vw;
 }
+.play:hover{
+    cursor: pointer;
+}
 
 .score{
     margin-left: 55vw;
@@ -106,7 +109,7 @@ canvas{
     margin-top: 780px;
     width: 450px;
     height: 300px;
-    border: 3px solid black;
+    border: 3px solid rgb(55, 55, 55);
     margin-left: 550px;
     border-radius: 1rem;
     backdrop-filter: blur(12px);

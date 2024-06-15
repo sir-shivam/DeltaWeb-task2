@@ -9,6 +9,8 @@ const backgroundImage=new Image();
 backgroundImage.src='./Assets/images/background.jpeg';
 //console.log(backgroundImage);
 
+let gameStart = false;
+
 function drawBackground() {
     c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height );
 }
@@ -16,6 +18,10 @@ function drawBackground() {
 const startButton = document.querySelector('.enter');
 const playerNameInput = document.getElementById('playerName');
 const nickNameInput = document.getElementById('nickName');
+let pause = false;
+setTimeout(() => {
+    pause = true; 
+  }, 2000);
 
 startButton.addEventListener('click', function() {
   const playerName = playerNameInput.value.trim();
@@ -41,8 +47,12 @@ startButton.addEventListener('click', function() {
     toast.remove(); 
   }, 3000);
 
+  pause = false;
+  animate();
+
   const start = document.querySelector(".start");
   start.style.display = "none";
+  gameStart = true;
 
   console.log('Game starting with:', gameData);
 });
@@ -67,6 +77,8 @@ let bullets = [];
 let jombies = [];
 let blockss = [];
 // let height=150;
+
+
 class character {
     constructor({position , velocity}){
         this.position = position;
@@ -380,8 +392,6 @@ const keys = {
     }
 }
 
-let pause = false;
-
 function animate (){
     if (!pause){
     window.requestAnimationFrame(animate);}
@@ -425,7 +435,7 @@ function animate (){
 }
     
     
-// animate();
+animate();
 
 let interval1 = setInterval(() => {
     if(!pause){
@@ -634,14 +644,13 @@ let interval = setInterval(() => {
 let play = document.querySelector(".play");
 
 play.addEventListener("click" , ()=> {
-    if(!pause){
-        play.innerHTML=`<i class="fa-solid fa-play"></i>`;
-        pause= true;
-    }
-
-    else {
+    if(pause && gameStart){
         play.innerHTML=`<i class="fa-solid fa-pause"></i>`;
         pause= false;
-        animate();
+        animate();   
+    }
+    else {
+        play.innerHTML=`<i class="fa-solid fa-play"></i>`;
+        pause= true;
     }
 })
