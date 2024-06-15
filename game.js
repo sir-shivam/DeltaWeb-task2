@@ -135,6 +135,10 @@ class character {
             player.velocity.x = 0;
             player.velocity.y = 0;
         }
+        gun1.position.x = this.position.x + 100;
+        gun1.pivote.x = this.position.x + 100;
+        gun1.position.y = this.position.y + 150;
+        gun1.pivote.y = this.position.y + 150;
 }
 }
 
@@ -163,6 +167,8 @@ class blocks {
             this.velocity.y = 0;
         } 
         else this.velocity.y += gravity; 
+
+        
     }
 }
 
@@ -188,7 +194,7 @@ class gun {
             bullet.move();
             bullet.draw();
 
-            if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height ) {
+            if (bullet.x < 0 || bullet.x > canvas.width  || bullet.y > canvas.height ) {
                 bullets.splice(i, 1);
                }
             else if(collide(bullet)){
@@ -329,11 +335,11 @@ const player = new character({
 const gun1 = new gun ({
     position: {
         x: player.position.x + 50,
-        y: 600
+        y: 500
     },
     pivote: {
-        x: player.position.x,
-        y: 600
+        x: player.position.x + 45,
+        y: 500
      }
 })
 
