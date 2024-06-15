@@ -13,6 +13,41 @@ function drawBackground() {
     c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height );
 }
 
+const startButton = document.querySelector('.enter');
+const playerNameInput = document.getElementById('playerName');
+const nickNameInput = document.getElementById('nickName');
+
+startButton.addEventListener('click', function() {
+  const playerName = playerNameInput.value.trim();
+  const nickName = nickNameInput.value.trim();
+
+  if (playerName === '' || nickName === '') {
+    alert('Please enter both your name and nick-name to start the game!');
+    return; 
+  }
+
+  let gameData = {
+    playerName: playerName,
+    nickName: nickName
+  };
+
+  const toast = document.createElement('div');
+  toast.classList.add('toast'); 
+  toast.textContent = `Welcome, ${gameData.playerName} !`;
+  document.body.appendChild(toast);
+
+ 
+  setTimeout(() => {
+    toast.remove(); 
+  }, 3000);
+
+  const start = document.querySelector(".start");
+  start.style.display = "none";
+
+  console.log('Game starting with:', gameData);
+});
+
+
 const boy = new Image();
 boy.src='./Assets/images/player.png';
 
@@ -390,7 +425,8 @@ function animate (){
 }
     
     
-animate();
+// animate();
+
 let interval1 = setInterval(() => {
     if(!pause){
     jombieArrival();
