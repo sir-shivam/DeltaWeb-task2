@@ -52,8 +52,11 @@ canvas{
     cursor: pointer;
 }
 
+.reset{
+    margin-left: 42vw;
+}
 .score{
-    margin-left: 55vw;
+    margin-left: 60vw;
     padding: 4px;
     width: 140px;
     height: 56px;
@@ -105,6 +108,7 @@ canvas{
 }
 
 .start{
+    display: none;
     position: absolute;
     margin-top: 780px;
     width: 450px;
