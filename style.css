@@ -177,3 +177,33 @@ canvas{
     font-size: 16px; 
   }
   
+.board1{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    height: 10%;
+    border: 2px solid #3f7fac;
+    margin-left: 5%;
+    margin-top: 5px;
+    border-radius: 2rem;
+    font-size: 20px;
+    font-weight: 600;
+    background: linear-gradient(to top, #3f7fac 0%, #fcfcff 100%);
+
+}
+
+.rank {
+    text-align: center;
+    width: 20%;
+}
+.name{
+    text-align: center;
+    width: 60%;
+}
+.Sscore{
+    text-align: center;
+    width: 20%;
+
+}
+

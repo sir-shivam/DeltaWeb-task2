@@ -1,5 +1,3 @@
-//console.log("Code Run");
-
 let canvas = document.querySelector("canvas");
 
 canvas.width = window.innerWidth - 1.7 ;
@@ -7,9 +5,13 @@ canvas.height = window.innerHeight - 4.1;
 
 const backgroundImage=new Image();
 backgroundImage.src='./Assets/images/background.jpeg';
-//console.log(backgroundImage);
+
+const gunImage=new Image();
+gunImage.src='./Assets/images/gun.png';
 
 let gameStart = false;
+let playerRank = 1;
+let gameData;
 
 function drawBackground() {
     c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height );
@@ -32,7 +34,7 @@ startButton.addEventListener('click', function() {
     return; 
   }
 
-  let gameData = {
+gameData = {
     playerName: playerName,
     nickName: nickName
   };
@@ -49,6 +51,8 @@ startButton.addEventListener('click', function() {
 
   pause = false;
   animate();
+  
+  createBoard();
 
   const start = document.querySelector(".start");
   start.style.display = "none";
@@ -176,7 +180,7 @@ class gun {
     constructor({position,pivote}) {
         this.position = position;
         this.width = 100;
-        this.height = 20;
+        this.height = 40;
         this.pivote = pivote;
         this.rotationAngle = 0;
     }
@@ -186,8 +190,9 @@ class gun {
         c.translate(this.pivote.x, this.pivote.y)
         c.rotate(this.rotationAngle * Math.PI / 180)
         c.translate(-this.pivote.x, -this.pivote.y);
-        c.fillStyle = "green";
-        c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        // c.fillStyle = "green";
+        c.drawImage(gunImage,this.position.x, this.position.y, this.width, this.height)
+        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
         c.restore();
         
         bullets.forEach( bullet => {
@@ -573,9 +578,10 @@ function hit (bullet){
         if(test){
             bullets.splice(i, 1);
             jombies.splice(jom2,1);
-            score++;
+            score += 10;
             let score2 = document.querySelector(".score2");
             score2.innerHTML = `${score}`;
+            document.querySelector(".Sscore").innerHTML = `${score}`;
             console.log("+1");
             }
     }
@@ -660,3 +666,40 @@ play.addEventListener("click" , ()=> {
         pause= true;
     }
 })
+
+let isOn = false;
+let board = document.querySelector(".board");
+let leader = document.querySelector(".leader");
+leader.addEventListener("click" , ()=> {
+    if(!isOn){
+        board.style.display = "block";
+        isOn = true;
+    }
+    else {
+        board.style.display = "none";
+        isOn = false;
+    }
+
+})
+
+// code for leader board
+function createBoard(){
+let board1 = document.createElement("div");
+let rank = document.createElement("div");
+let name = document.createElement("div");
+let Sscore = document.createElement("div");
+
+board1.classList.add("board1");
+rank.classList.add("rank");
+name.classList.add("name");
+Sscore.classList.add("Sscore");
+
+rank.innerHTML= playerRank++;
+name.innerHTML= gameData.playerName;
+Sscore.innerHTML = score;
+
+board1.appendChild(rank);
+board1.appendChild(name);
+board1.appendChild(Sscore);
+document.querySelector(".board").appendChild(board1);
+}
