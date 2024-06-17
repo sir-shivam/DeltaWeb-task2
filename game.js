@@ -11,6 +11,8 @@ gunImage.src='./Assets/images/gun.png';
 
 const axeImage = new Image();
 axeImage.src = './Assets/images/axe.png';
+const axeImage1 = new Image();
+axeImage1.src = './Assets/images/axe1.png';
 
 const boy = new Image();
 boy.src='./Assets/images/player.png';
@@ -24,7 +26,7 @@ enemy.src='./Assets/images/jombie.png';
 const enemy1 = new Image();
 enemy1.src='./Assets/images/jombie1.png';
 
-let gameStart = false;
+let gameStart = true;
 let playerRank = 1;
 let gameData;
 
@@ -96,7 +98,7 @@ class character {
         this.healthBar = {
             position: this.position,
             width: 100,
-            height: 5
+            height: 8
         }
         this.square = {
             position: this.position,
@@ -191,6 +193,7 @@ class blocks {
         this.position.x += this.velocity.x;
         const isColliding = this.checkForCollision();
         if (isColliding) {
+
         this.touch.velocity.y = 0; 
         } else {
         this.position.y += this.velocity.y;
@@ -205,16 +208,16 @@ class blocks {
     checkForCollision() {
     for (let i = 0; i < blockss.length; i++) {
       const otherBlock = blockss[i];
-      if (otherBlock !== this && // Don't check collision with itself
+      if (otherBlock !== this && 
           this.position.x + this.width > otherBlock.position.x &&
           this.position.x < otherBlock.position.x + otherBlock.width &&
           this.position.y + this.height > otherBlock.position.y &&
           this.position.y < otherBlock.position.y + otherBlock.height) {
-            this.touch = otherBlock;
-        return true; // Collision detected
+            this.touch =blockss[i];
+        return true;
       }
     }
-    return false; // No collision
+    return false; 
   }
 }
 
@@ -286,6 +289,7 @@ class jombie {
         };
         this.pos =pos;
         this.hit = null;
+        this.player = false;
     }
 
     isCollidingWith(jombi2) {
@@ -352,24 +356,39 @@ class jombie {
         
             if (this.axe.swinging) {
               this.axe.angle += this.axe.swingSpeed;
-              if (this.axe.angle > Math.PI/3 || this.axe.angle < -Math.PI/3) {
+              if (this.axe.angle > Math.PI || this.axe.angle < -Math.PI) {
                 this.axe.swinging = false;
-                blockss[num].healthBar.width -= 10;
+                if(this.player){
+                    player.healthBar.width -= 10;
+                    if(player.healthBar.width <=0){
+                        console.log("game over");
+                        alert("game over");
+                    }
+                }
+                else {blockss[num].healthBar.width -= 10;
                 if(blockss[num].healthBar.width <= 0){
                     blockss.splice(num,1);
-                }
+                }}
                 this.axe.angle = this.pos === "left" ? -60 * Math.PI / 180 : 60 * Math.PI / 180; 
               }
             }
     
     const axeOffsetX = this.pos === "left" ? 80 : 10;
     const axeOffsetY = 100;
-
+    if(this.pos == "right"){
     c.save(); 
-    c.translate(this.position.x + axeOffsetX, this.position.y + axeOffsetY); 
-    c.rotate(this.axe.angle); 
-    c.drawImage(axeImage, -this.axe.width / 2, -this.axe.height / 2, this.axe.width, this.axe.height )
+    c.translate((this.position.x + axeOffsetX), (this.position.y + axeOffsetY)); 
+    c.rotate(-this.axe.angle); 
+    c.drawImage(axeImage1, -this.axe.width / 2, -this.axe.height / 2, this.axe.width, this.axe.height )
     c.restore();
+    }
+    else if(this.pos == "left"){
+        c.save(); 
+        c.translate((this.position.x + axeOffsetX), (this.position.y + axeOffsetY)); 
+        c.rotate(this.axe.angle); 
+        c.drawImage(axeImage, -this.axe.width / 2, -this.axe.height / 2, this.axe.width, this.axe.height )
+        c.restore();
+        }
   }
 
     move(){
@@ -506,8 +525,16 @@ function animate (){
             jom.swingAxe();
             jom.velocity.x = 0;
             }
+        else if (playerCollide(jom)){
+            jom.swingAxe();
+            jom.velocity.x = 0;
+            jom.player = true;
+        }
         jom.move();
     })
+
+
+
 }
     
 animate();
@@ -515,10 +542,10 @@ animate();
 setTimeout(()=> {
     let interval1 = setInterval(() => {
         if(!pause){
-            jombieArrival();
         }
     }, 5000);
 },1000);
+jombieArrival();
 
 function fireBullet() {
     distance = 2 + gun1.width;
@@ -545,7 +572,7 @@ function jombieArrival(){
         pos : "left"
     }))}
 
-    if(jombies.length<10 && jombies.length>1){
+    if(jombies.length<10){
         jombies.push(new jombie ({
             position:{
                 x: numBtw(1250,1350) ,
@@ -595,6 +622,16 @@ function jombieCollide(jom) {
     }
 }
 
+function playerCollide(jom){
+    return (
+        jom.position.x < player.position.x + player.width &&
+        jom.position.x + jom.width > player.position.x &&
+        jom.position.y < player.position.y + player.height &&
+        jom.position.y + jom.height > player.position.y 
+    );
+}
+
+
 function hit (bullet){
     for(let jom2 =0 ; jom2 < jombies.length ; jom2++  ) {
         let test = 
@@ -615,7 +652,7 @@ function hit (bullet){
             let score2 = document.querySelector(".score2");
             score2.innerHTML = `${score}`;
             // document.querySelector(".Sscore").innerHTML = `${score}`;
-            console.log("+1");
+            console.log("+10");
             }
     }
 }
@@ -672,7 +709,7 @@ features.forEach((f)=> {
 
 let down = false;
 let interval = setInterval(() => {
-    console.log("transalate");
+    // console.log("transalate");
     if(!down){
         features.forEach((f)=> {
             f.style.transform = "translate(0px,8px)";
@@ -698,6 +735,10 @@ play.addEventListener("click" , ()=> {
         play.innerHTML=`<i class="fa-solid fa-play"></i>`;
         pause= true;
     }
+})
+let reset = document.querySelector(".reset");
+reset.addEventListener("click", () => {
+    window.location.reload();
 })
 
 let isOn = false;
