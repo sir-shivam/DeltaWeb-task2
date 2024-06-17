@@ -9,6 +9,21 @@ backgroundImage.src='./Assets/images/background.jpeg';
 const gunImage=new Image();
 gunImage.src='./Assets/images/gun.png';
 
+const axeImage = new Image();
+axeImage.src = './Assets/images/axe.png';
+
+const boy = new Image();
+boy.src='./Assets/images/player.png';
+
+const stone = new Image();
+stone.src =`./Assets/images/stone.png`;
+
+const enemy = new Image();
+enemy.src='./Assets/images/jombie.png';
+
+const enemy1 = new Image();
+enemy1.src='./Assets/images/jombie1.png';
+
 let gameStart = false;
 let playerRank = 1;
 let gameData;
@@ -21,6 +36,7 @@ const startButton = document.querySelector('.enter');
 const playerNameInput = document.getElementById('playerName');
 const nickNameInput = document.getElementById('nickName');
 let pause = false;
+
 // setTimeout(() => {
 //     pause = true; 
 //   }, 2000);
@@ -61,26 +77,12 @@ let pause = false;
 //   console.log('Game starting with:', gameData);
 // });
 
-
-const boy = new Image();
-boy.src='./Assets/images/player.png';
-
-const stone = new Image();
-stone.src =`./Assets/images/stone.png`;
-
-const enemy = new Image();
-enemy.src='./Assets/images/jombie.png';
-
-const enemy1 = new Image();
-enemy1.src='./Assets/images/jombie1.png';
-
 let c = canvas.getContext("2d");
 let gravity = 0.999;
 let score = 0;
 let bullets = [];
 let jombies = [];
 let blockss = [];
-// let height=150;
 let mousePos = null;
 let playerFacing = "right";
 
@@ -122,11 +124,7 @@ class character {
       }
 
     draw() {
-        // c.fillStyle = "red";
-        // c.beginPath();
         c.drawImage(boy,this.position.x , this.position.y ,this.width, this.height);
-        // c.fillRect(this.position.x , this.position.y ,this.width, this.height);
-        // c.fillRect(this.square.position.x, this.square.position.y - 40 , this.square.width, this.square.height);
         c.drawImage(stone,this.square.position.x, this.square.position.y - 40 , this.square.width, this.square.height )
         c.fillStyle = "green";
         c.fillRect(this.healthBar.position.x + 10, this.healthBar.position.y - 10, this.healthBar.width, this.healthBar.height)
@@ -139,15 +137,11 @@ class character {
         this.draw();
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
-
         if(this.position.y + this.height + this.velocity.y >= canvas.height - 100){
             this.velocity.y = 0;
         } 
         else this.velocity.y += gravity; 
-
         if(player.isCollidingWithBlocks()){
-            //console.log("touching");
-            // player.position.x -=2;
             player.velocity.x = 0;
             player.velocity.y = 0;
         }
@@ -178,37 +172,51 @@ class blocks {
             width: 100,
             height: 5
         }
+        this.touch = null;
     }
 
     draw() {
         c.fillStyle = "pink";
         c.strokeStyle = "black";
-        // c.stroke();
-        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
-        // c.beginPath();
         c.drawImage(stone, this.position.x, this.position.y, this.width, this.height);
         c.fillStyle = "green"
         c.fillRect(this.healthBar.position.x + 10, this.healthBar.position.y + 5 + this.height, this.healthBar.width, this.healthBar.height)
         c.lineWidth= 0.3;  
         c.strokeStyle= "dark green";  
         c.strokeRect(this.healthBar.position.x + 10, this.healthBar.position.y + 5 + this.height, 100 , this.healthBar.height);
-        // //console.log("done");
     }
 
     update() {
         this.draw();
         this.position.x += this.velocity.x;
+        const isColliding = this.checkForCollision();
+        if (isColliding) {
+        this.touch.velocity.y = 0; 
+        } else {
         this.position.y += this.velocity.y;
-        if(this.position.y + this.height + this.velocity.y >= canvas.height - 100){
-            this.velocity.y = 0;
-        } 
-        else this.velocity.y += gravity; 
-
-        
+        if (this.position.y + this.height + this.velocity.y >= canvas.height - 100) {
+        this.velocity.y = 0; 
+        } else {
+        this.velocity.y += gravity; 
+        }
     }
-}
+    }
 
-// let angle1 = 0;
+    checkForCollision() {
+    for (let i = 0; i < blockss.length; i++) {
+      const otherBlock = blockss[i];
+      if (otherBlock !== this && // Don't check collision with itself
+          this.position.x + this.width > otherBlock.position.x &&
+          this.position.x < otherBlock.position.x + otherBlock.width &&
+          this.position.y + this.height > otherBlock.position.y &&
+          this.position.y < otherBlock.position.y + otherBlock.height) {
+            this.touch = otherBlock;
+        return true; // Collision detected
+      }
+    }
+    return false; // No collision
+  }
+}
 
 class gun {
     constructor({position,pivote}) {
@@ -223,11 +231,8 @@ class gun {
         c.save();
         c.translate(this.pivote.x, this.pivote.y)
         c.rotate(this.rotationAngle);
-        
         c.translate(-this.pivote.x, -this.pivote.y);
-        // c.fillStyle = "green";
         c.drawImage(gunImage,this.position.x, this.position.y, this.width, this.height)
-        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
         c.restore();
         
         bullets.forEach( bullet => {
@@ -238,10 +243,8 @@ class gun {
                 bullets.splice(i, 1);
                }
             else if(collide(bullet)){
-                //console.log("collide");
                 bullets.splice(i, 1);
             }
-            
             hit(bullet);
         })
     }
@@ -272,14 +275,15 @@ class jombie {
             width: 80,
             height: 5
         }
+
         this.axe = {
             position: this.position,
             width: 20,
             height: 80,
             swinging: false,
-            angle: -60 * Math.PI / 180, // Initial angle for the axe
-            swingSpeed: Math.PI / 30, // Controls how fast the axe swings (adjust for desired speed)
-          };
+            angle: 60 * Math.PI / 180,
+            swingSpeed: Math.PI / 30, 
+        };
         this.pos =pos;
         this.hit = null;
     }
@@ -318,7 +322,6 @@ class jombie {
                     else {
                     jombi2.velocity.x = -1;
                     } 
-
             }
         }
         return false;
@@ -327,12 +330,10 @@ class jombie {
     swingAxe(a) {
         this.axe.swinging = true;
         this.hit = a;
-
       }
     
         create() {
             c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
-        
             c.fillStyle = "red";
             c.fillRect(
               this.healthBar.position.x + this.width / 6,
@@ -351,7 +352,7 @@ class jombie {
         
             if (this.axe.swinging) {
               this.axe.angle += this.axe.swingSpeed;
-              if (this.axe.angle > Math.PI || this.axe.angle < -Math.PI) {
+              if (this.axe.angle > Math.PI/3 || this.axe.angle < -Math.PI/3) {
                 this.axe.swinging = false;
                 blockss[num].healthBar.width -= 10;
                 if(blockss[num].healthBar.width <= 0){
@@ -361,22 +362,15 @@ class jombie {
               }
             }
     
-
-    const axeOffsetX = this.pos === "left" ? 70 : 10;
-    const axeOffsetY = 40;
-    const rotatedAxePosition = this.getRotatedPoint(
-      axeOffsetX,
-      axeOffsetY,
-      this.axe.angle
-    );
+    const axeOffsetX = this.pos === "left" ? 80 : 10;
+    const axeOffsetY = 100;
 
     c.save(); 
     c.translate(this.position.x + axeOffsetX, this.position.y + axeOffsetY); 
     c.rotate(this.axe.angle); 
-    c.fillRect(-this.axe.width / 2, -this.axe.height / 2, this.axe.width, this.axe.height);
+    c.drawImage(axeImage, -this.axe.width / 2, -this.axe.height / 2, this.axe.width, this.axe.height )
     c.restore();
   }
-
 
     move(){
         this.position.x += this.velocity.x;
@@ -385,23 +379,11 @@ class jombie {
             } 
         else this.velocity.y += gravity; 
         this.position.y += this.velocity.y;
-
         if(this.isCollideJombie()){
             //console.log("touching jombie");
         }
-
         this.create();
-    }
-
-    getRotatedPoint(x, y, angle) {
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
-        return {
-          x: x * cos - y * sin,
-          y: x * sin + y * cos,
-        };
-      }
-    
+    }    
 }   
 
 const jombie1 = new jombie({
@@ -415,7 +397,6 @@ const jombie1 = new jombie({
     }
 }
 );
-
 
 let i=0;
 class bullet {
@@ -434,7 +415,6 @@ class bullet {
             this.dy += gravity;
         } 
     }
-
 
     draw() {
         c.fillStyle = 'black';
@@ -474,17 +454,8 @@ const box1 = new blocks ({
         y: player.velocity.y
     }
 })
+
 const box2 = new blocks ({
-    position: {
-        x: player.position.x + 200,
-        y: -200
-    },
-    velocity: {
-        x: player.velocity.x,
-        y: player.velocity.y
-    }
-})
-const box3 = new blocks ({
     position: {
         x: player.position.x - 220,
         y: 0 
@@ -494,18 +465,8 @@ const box3 = new blocks ({
         y: player.velocity.y
     }
 })
-const box4 = new blocks ({
-    position: {
-        x: player.position.x - 200,
-        y: -200
-    },
-    velocity: {
-        x: player.velocity.x,
-        y: player.velocity.y
-    }
-})
 
-blockss = [box1,box2,box3,box4];
+blockss = [box1,box2];
 
 const keys = {
     a: {
@@ -524,43 +485,30 @@ function animate (){
     window.requestAnimationFrame(animate);}
     c.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
-
     player.update();
     gun1.update();
     blockss.forEach(b => {
         b.update();
     });
-    
-    player.velocity.x = 0;
 
+    player.velocity.x = 0;
     if (keys.a.pressed && lastKey == "a") {
+        player.velocity.x = -1;
         player.velocity.x = -5;
     }
     else if (keys.d.pressed && lastKey == "d") {
+        player.velocity.x = 1;
         player.velocity.x = 5;
         }
-
-    if(box2.position.y + box2.height >= box1.position.y){
-        box2.velocity.y = 0; 
-    }
-
-    if(box4.position.y + box4.height >= box3.position.y){
-        box4.velocity.y = 0; 
-    }
-
+    
     jombies.forEach(jom => {
-
         if(jombieCollide(jom)){
-            //console.log ("jombi");
             jom.swingAxe();
             jom.velocity.x = 0;
             }
-
         jom.move();
     })
-
 }
-    
     
 animate();
 
@@ -579,8 +527,6 @@ function fireBullet() {
     let delY = distance * Math.sin(angle + 0.05);
     let bulletX = gun1.pivote.x + delX;
     let bulletY = gun1.pivote.y + delY;
-    
-    //console.log(angle , gun1.rotationAngle);
     bullets.push(new bullet(bulletX, bulletY, angle))
 }
 
@@ -620,31 +566,15 @@ function numBtw(min, max) {
   }  
 
 function collide(bullet) {
-    let test1 = 
-       (bullet.x >= box4.position.x &&
-        bullet.x <= box4.position.x + box4.height &&
-        bullet.y >= box4.position.y &&
-        bullet.y <= box4.position.y + box4.width) 
-    
-    let test2 = 
-       (bullet.x >= box3.position.x &&
-        bullet.x <= box3.position.x + box4.height &&
-        bullet.y >= box3.position.y &&
-        bullet.y <= box3.position.y + box4.width) 
-    
-    let test3 = 
-       (bullet.x >= box1.position.x &&
-        bullet.x <= box1.position.x + box4.height &&
-        bullet.y >= box1.position.y &&
-        bullet.y <= box1.position.y + box4.width) 
-    
-    let test4 = 
-        (bullet.x >= box2.position.x &&
-        bullet.x <= box2.position.x + box4.height &&
-        bullet.y >= box2.position.y &&
-        bullet.y <= box2.position.y + box4.width) 
-
-    return (test1 || test2 || test3 || test4);
+    let test;
+    blockss.forEach(b => {
+        test = 
+       (bullet.x >= b.position.x &&
+        bullet.x <= b.position.x + b.height &&
+        bullet.y >= b.position.y &&
+        bullet.y <= b.position.y + b.width) 
+    })
+    return (test);
 }
 
 let num;
@@ -653,48 +583,17 @@ function jombieCollide(jom) {
     let test;
     for(a = 0 ; a< blockss.length ; a++){
         test = (
-            jom.position.x < blockss[a].position.x + blockss[a].width &&
+        jom.position.x < blockss[a].position.x + blockss[a].width &&
         jom.position.x + jom.width > blockss[a].position.x &&
         jom.position.y < blockss[a].position.y + blockss[a].height &&
         jom.position.y + jom.height > blockss[a].position.y 
         )
-
         if (test){
             num = a;
             return true;
         }
     }
-
-    // let test1 = 
-    // (   jom.position.x < box1.position.x + box1.width &&
-    //     jom.position.x + jom.width > box1.position.x &&
-    //     jom.position.y < box1.position.y + box1.height &&
-    //     jom.position.y + jom.height > box1.position.y  
-    // )
-    
-    // let test2 = 
-    // (    jom.position.x < box2.position.x + box2.width &&
-    //     jom.position.x + jom.width > box2.position.x &&
-    //     jom.position.y < box2.position.y + box2.height &&
-    //     jom.position.y + jom.height > box2.position.y  
-    // )
-
-    // let test3 = 
-    // (     jom.position.x < box3.position.x + box3.width &&
-    //       jom.position.x + jom.width > box3.position.x &&
-    //       jom.position.y < box3.position.y + box3.height &&
-    //       jom.position.y + jom.height > box3.position.y  
-    // )
-
-    // let test4 = 
-    // (    jom.position.x < box3.position.x + box3.width &&
-    //     jom.position.x + jom.width > box3.position.x &&
-    //     jom.position.y < box3.position.y + box3.height &&
-    //     jom.position.y + jom.height > box4.position.y  
-    // )
-    // return(test1 || test2 || test3 || test4);
 }
-
 
 function hit (bullet){
     for(let jom2 =0 ; jom2 < jombies.length ; jom2++  ) {
@@ -705,7 +604,6 @@ function hit (bullet){
         bullet.y >= jombies[jom2].position.y &&
         bullet.y <= jombies[jom2].position.y + jombies[jom2].height
         )
-        //console.log(test);
 
         if(test){
             bullets.splice(i, 1);
@@ -766,7 +664,6 @@ window.addEventListener("keyup", (event) => {
 canvas.addEventListener("click" , fireBullet );
 
 // feature functions
-
 let features = document.querySelectorAll(".feature");
 features.forEach((f)=> {
     f.style.marginTop = "150px";
@@ -791,7 +688,6 @@ let interval = setInterval(() => {
 }, 500);
 
 let play = document.querySelector(".play");
-
 play.addEventListener("click" , ()=> {
     if(pause && gameStart){
         play.innerHTML=`<i class="fa-solid fa-pause"></i>`;
@@ -842,7 +738,6 @@ document.querySelector(".board").appendChild(board1);
 }
 
 canvas.addEventListener("mousemove", e => {
-
     mousePos = {
         x: e.clientX - canvas.offsetLeft,
         y: e.clientY - canvas.offsetTop
@@ -858,8 +753,7 @@ canvas.addEventListener("mousedown", (e) => {
     }
   });
 
-  function createBox() {
-      //console.log(angle , gun1.rotationAngle);
+function createBox() {
     if(playerFacing == "right"){
       blockss.push(new blocks({
         position: {
