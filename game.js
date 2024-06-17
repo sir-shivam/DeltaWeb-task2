@@ -274,13 +274,14 @@ class jombie {
         }
         this.axe = {
             position: this.position,
-            width: 80,
-            height: 20
-        }
+            width: 20,
+            height: 80,
+            swinging: false,
+            angle: -60 * Math.PI / 180, // Initial angle for the axe
+            swingSpeed: Math.PI / 30, // Controls how fast the axe swings (adjust for desired speed)
+          };
         this.pos =pos;
-        this.initial = 140 * Math.PI / 180;
-        this.final  = 10* Math.PI / 180;
-
+        this.hit = null;
     }
 
     isCollidingWith(jombi2) {
@@ -300,7 +301,6 @@ class jombie {
                     else {
                     jombi2.position.x += 1;
                     }
-                    // j.position.x -= 1;
                     return true;
                 }
             }
@@ -324,24 +324,60 @@ class jombie {
         return false;
     }
 
-    create() {
-        // c.fillStyle = "gray";
-        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
-        // c.beginPath();
-        c.drawImage(this.image,this.position.x, this.position.y, this.width, this.height);
-        c.fillStyle = "red"
-        c.fillRect(this.healthBar.position.x + this.width/6, this.healthBar.position.y - 20, this.healthBar.width, this.healthBar.height)
-        c.lineWidth= 0.3;  
-        c.strokeStyle= "red";  
-        c.strokeRect(this.healthBar.position.x + this.width/6, this.healthBar.position.y - 20, 80 , this.healthBar.height);
-        if(this.pos == "left"){
-        c.fillRect(this.axe.position.x + 30, this.axe.position.y + 100, this.axe.width, this.axe.height);
-        }
-        else{
-        c.fillRect(this.axe.position.x - 20, this.axe.position.y + 100, this.axe.width, this.axe.height);
-        }
-    }
+    swingAxe(a) {
+        this.axe.swinging = true;
+        this.hit = a;
+
+      }
     
+        create() {
+            c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+        
+            c.fillStyle = "red";
+            c.fillRect(
+              this.healthBar.position.x + this.width / 6,
+              this.healthBar.position.y - 20,
+              this.healthBar.width,
+              this.healthBar.height
+            );
+            c.lineWidth = 0.3;
+            c.strokeStyle = "red";
+            c.strokeRect(
+              this.healthBar.position.x + this.width / 6,
+              this.healthBar.position.y - 20,
+              80,
+              this.healthBar.height
+            );
+        
+            if (this.axe.swinging) {
+              this.axe.angle += this.axe.swingSpeed;
+              if (this.axe.angle > Math.PI || this.axe.angle < -Math.PI) {
+                this.axe.swinging = false;
+                blockss[num].healthBar.width -= 10;
+                if(blockss[num].healthBar.width <= 0){
+                    blockss.splice(num,1);
+                }
+                this.axe.angle = this.pos === "left" ? -60 * Math.PI / 180 : 60 * Math.PI / 180; 
+              }
+            }
+    
+
+    const axeOffsetX = this.pos === "left" ? 70 : 10;
+    const axeOffsetY = 40;
+    const rotatedAxePosition = this.getRotatedPoint(
+      axeOffsetX,
+      axeOffsetY,
+      this.axe.angle
+    );
+
+    c.save(); 
+    c.translate(this.position.x + axeOffsetX, this.position.y + axeOffsetY); 
+    c.rotate(this.axe.angle); 
+    c.fillRect(-this.axe.width / 2, -this.axe.height / 2, this.axe.width, this.axe.height);
+    c.restore();
+  }
+
+
     move(){
         this.position.x += this.velocity.x;
         if(this.position.y + this.height + this.velocity.y >= canvas.height - 100){
@@ -356,7 +392,17 @@ class jombie {
 
         this.create();
     }
-}
+
+    getRotatedPoint(x, y, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+          x: x * cos - y * sin,
+          y: x * sin + y * cos,
+        };
+      }
+    
+}   
 
 const jombie1 = new jombie({
     position: {
@@ -484,11 +530,6 @@ function animate (){
     blockss.forEach(b => {
         b.update();
     });
-    // box1.update();
-    // box2.update();
-    // box3.update();
-    // box4.update();
-    // jombie1.move();
     
     player.velocity.x = 0;
 
@@ -508,8 +549,10 @@ function animate (){
     }
 
     jombies.forEach(jom => {
+
         if(jombieCollide(jom)){
             //console.log ("jombi");
+            jom.swingAxe();
             jom.velocity.x = 0;
             }
 
@@ -524,16 +567,10 @@ animate();
 setTimeout(()=> {
     let interval1 = setInterval(() => {
         if(!pause){
-        jombieArrival();
+            jombieArrival();
         }
     }, 5000);
 },1000);
-
-
-// clearInterval(interval1);
-
-
-
 
 function fireBullet() {
     distance = 2 + gun1.width;
@@ -610,35 +647,52 @@ function collide(bullet) {
     return (test1 || test2 || test3 || test4);
 }
 
+let num;
+
 function jombieCollide(jom) {
-    let test1 = 
-    (   jom.position.x < box1.position.x + box1.width &&
-        jom.position.x + jom.width > box1.position.x &&
-        jom.position.y < box1.position.y + box1.height &&
-        jom.position.y + jom.height > box1.position.y  
-    )
+    let test;
+    for(a = 0 ; a< blockss.length ; a++){
+        test = (
+            jom.position.x < blockss[a].position.x + blockss[a].width &&
+        jom.position.x + jom.width > blockss[a].position.x &&
+        jom.position.y < blockss[a].position.y + blockss[a].height &&
+        jom.position.y + jom.height > blockss[a].position.y 
+        )
+
+        if (test){
+            num = a;
+            return true;
+        }
+    }
+
+    // let test1 = 
+    // (   jom.position.x < box1.position.x + box1.width &&
+    //     jom.position.x + jom.width > box1.position.x &&
+    //     jom.position.y < box1.position.y + box1.height &&
+    //     jom.position.y + jom.height > box1.position.y  
+    // )
     
-    let test2 = 
-    (    jom.position.x < box2.position.x + box2.width &&
-        jom.position.x + jom.width > box2.position.x &&
-        jom.position.y < box2.position.y + box2.height &&
-        jom.position.y + jom.height > box2.position.y  
-    )
+    // let test2 = 
+    // (    jom.position.x < box2.position.x + box2.width &&
+    //     jom.position.x + jom.width > box2.position.x &&
+    //     jom.position.y < box2.position.y + box2.height &&
+    //     jom.position.y + jom.height > box2.position.y  
+    // )
 
-    let test3 = 
-    (     jom.position.x < box3.position.x + box3.width &&
-          jom.position.x + jom.width > box3.position.x &&
-          jom.position.y < box3.position.y + box3.height &&
-          jom.position.y + jom.height > box3.position.y  
-    )
+    // let test3 = 
+    // (     jom.position.x < box3.position.x + box3.width &&
+    //       jom.position.x + jom.width > box3.position.x &&
+    //       jom.position.y < box3.position.y + box3.height &&
+    //       jom.position.y + jom.height > box3.position.y  
+    // )
 
-    let test4 = 
-    (    jom.position.x < box3.position.x + box3.width &&
-        jom.position.x + jom.width > box3.position.x &&
-        jom.position.y < box3.position.y + box3.height &&
-        jom.position.y + jom.height > box4.position.y  
-    )
-    return(test1 || test2 || test3 || test4);
+    // let test4 = 
+    // (    jom.position.x < box3.position.x + box3.width &&
+    //     jom.position.x + jom.width > box3.position.x &&
+    //     jom.position.y < box3.position.y + box3.height &&
+    //     jom.position.y + jom.height > box4.position.y  
+    // )
+    // return(test1 || test2 || test3 || test4);
 }
 
 
