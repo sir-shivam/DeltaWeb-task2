@@ -105,10 +105,30 @@ canvas{
     z-index: 5;
     border-radius: 1rem;
     backdrop-filter: blur(5px);
+    overflow-y: auto;
+    scrollbar-color: #70d3dc #3862d6;
+}
+
+.sticker{
+    display: none;
+    text-align: center;
+    align-content: center;
+    width: 140px;
+    height: 40px;
+    position: absolute;
+    border-radius: 1rem;
+    border: 2px solid white;
+    color: white;
+    font-size: larger;
+    font-weight: 600;
+    margin-left: 43%;
+    margin-top: 7%;
+    background-color: rgb(183, 34, 183);
+    z-index: 5;
 }
 
 .start{
-    display: none;
+    /* display: none; */
     position: absolute;
     margin-top: 780px;
     width: 450px;

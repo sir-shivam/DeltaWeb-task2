@@ -29,59 +29,67 @@ enemy1.src='./Assets/images/jombie1.png';
 let gameStart = true;
 let playerRank = 1;
 let gameData;
-
-function drawBackground() {
-    c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height );
-}
+let gameArray = [];
+let gameScore = [];
+let score = 0;
 
 const startButton = document.querySelector('.enter');
 const playerNameInput = document.getElementById('playerName');
 const nickNameInput = document.getElementById('nickName');
 let pause = false;
 
-// setTimeout(() => {
-//     pause = true; 
-//   }, 2000);
+// storeArray();
+gameArray = fetchArray();
+console.log(gameArray);
 
-// startButton.addEventListener('click', function() {
-//   const playerName = playerNameInput.value.trim();
-//   const nickName = nickNameInput.value.trim();
+setTimeout(() => {
+    pause = true; 
+  }, 2000);
 
-//   if (playerName === '' || nickName === '') {
-//     alert('Please enter both your name and nick-name to start the game!');
-//     return; 
-//   }
+  startButton.addEventListener('click', function() {
+  const playerName = playerNameInput.value.trim();
+  const nickName = nickNameInput.value.trim();
 
-// gameData = {
-//     playerName: playerName,
-//     nickName: nickName
-//   };
+  if (playerName === '' || nickName === '') {
+    alert('Please enter both your name and nick-name to start the game!');
+    return; 
+  }
 
-//   const toast = document.createElement('div');
-//   toast.classList.add('toast'); 
-//   toast.textContent = `Welcome, ${gameData.playerName} !`;
-//   document.body.appendChild(toast);
+gameData = {
+    playerName: playerName,
+    nickName: nickName,
+    score: score,
+    id : null,
+    rk: null
+  };
 
- 
-//   setTimeout(() => {
-//     toast.remove(); 
-//   }, 3000);
+gameArray.push(gameData);
+storeArray();
+console.log(gameArray);
 
-//   pause = false;
-//   animate();
+          const toast = document.createElement('div');
+          toast.classList.add('toast'); 
+          toast.textContent = `Welcome, ${gameData.playerName} !`;
+          document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove(); 
+  }, 3000);
+
+  pause = false;
+  animate();
   
-//   createBoard();
-
-//   const start = document.querySelector(".start");
-//   start.style.display = "none";
-//   gameStart = true;
-
-//   console.log('Game starting with:', gameData);
-// });
+  createBoard();
+  (gameData.rk.parentNode).style.background=  `linear-gradient(to top, #30ce7d 0%, #fcfcff 100%)`;
+  blink();
+  const start = document.querySelector(".start");
+  start.style.display = "none";
+  gameStart = true;
+  console.log('Game starting with:', gameData);
+});
 
 let c = canvas.getContext("2d");
 let gravity = 0.999;
-let score = 0;
 let bullets = [];
 let jombies = [];
 let blockss = [];
@@ -183,7 +191,7 @@ class blocks {
         c.drawImage(stone, this.position.x, this.position.y, this.width, this.height);
         c.fillStyle = "green"
         c.fillRect(this.healthBar.position.x + 10, this.healthBar.position.y + 5 + this.height, this.healthBar.width, this.healthBar.height)
-        c.lineWidth= 0.3;  
+        c.lineWidth= 0.5;  
         c.strokeStyle= "dark green";  
         c.strokeRect(this.healthBar.position.x + 10, this.healthBar.position.y + 5 + this.height, 100 , this.healthBar.height);
     }
@@ -541,12 +549,13 @@ animate();
 setTimeout(()=> {
     let interval1 = setInterval(() => {
         if(!pause){
+            jombieArrival();
         }
     }, 5000);
 },1000);
-jombieArrival();
 
 function fireBullet() {
+    if(!pause){
     distance = 2 + gun1.width;
     let angle = gun1.rotationAngle;
     let delX = distance * Math.cos(angle + 0.05);
@@ -554,10 +563,10 @@ function fireBullet() {
     let bulletX = gun1.pivote.x + delX;
     let bulletY = gun1.pivote.y + delY;
     bullets.push(new bullet(bulletX, bulletY, angle))
-}
+}}
 
 function jombieArrival(){
-    if(jombies.length < 5){
+    if(jombies.length < 10){
     jombies.push(new jombie ({
         position:{
             x: numBtw(-200 , 200),
@@ -585,11 +594,6 @@ function jombieArrival(){
             pos: "right"
         })) }
 }
-
-// random values
-function numBtw(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }  
 
 function collide(bullet) {
     let test;
@@ -648,6 +652,16 @@ function hit (bullet){
             jombies.splice(jom2,1);
             }
             score += 10;
+            gameArray.forEach(g => {
+                if(g == gameData){
+                    g.score += 10;
+                    gameData = g;
+                    storeArray();
+                    (g.id).innerHTML = score;
+                    updateRank();
+                    return "done";
+                }
+            })
             let score2 = document.querySelector(".score2");
             score2.innerHTML = `${score}`;
             // document.querySelector(".Sscore").innerHTML = `${score}`;
@@ -657,6 +671,7 @@ function hit (bullet){
 }
 
 window.addEventListener("keydown", (event) => {
+    if(!pause){
     switch (event.key) {
         case 'd': 
             keys.d.pressed = true;
@@ -672,6 +687,10 @@ window.addEventListener("keydown", (event) => {
             keys.w.pressed = true;
             player.velocity.y = -18;
             break
+        case ' ':
+            event.preventDefault();
+            createBox();
+            break;
         // case 'ArrowLeft':
         //     gun1.rotationAngle -= 4; 
         //     break;
@@ -682,6 +701,7 @@ window.addEventListener("keydown", (event) => {
             fireBullet();
             break;
     }
+}
 })
 
 window.addEventListener("keyup", (event) => {
@@ -708,7 +728,6 @@ features.forEach((f)=> {
 
 let down = false;
 let interval = setInterval(() => {
-    // console.log("transalate");
     if(!down){
         features.forEach((f)=> {
             f.style.transform = "translate(0px,8px)";
@@ -747,16 +766,21 @@ leader.addEventListener("click" , ()=> {
     if(!isOn){
         board.style.display = "block";
         isOn = true;
+        pause = true;
+        document.querySelector(".sticker").style.display = "block";
     }
     else {
         board.style.display = "none";
         isOn = false;
+        pause = false;
+        document.querySelector(".sticker").style.display = "none";
     }
 
 })
 
 // code for leader board
 function createBoard(){
+gameArray.forEach(g => {  
 let board1 = document.createElement("div");
 let rank = document.createElement("div");
 let name = document.createElement("div");
@@ -767,31 +791,73 @@ rank.classList.add("rank");
 name.classList.add("name");
 Sscore.classList.add("Sscore");
 
-rank.innerHTML= playerRank++;
-name.innerHTML= gameData.playerName;
-Sscore.innerHTML = score;
+console.log(g.playerName);
+rank.innerHTML= 0;
+name.innerHTML= g.playerName;
+Sscore.innerHTML = g.score;
+g.id = Sscore;
+g.rk = rank;
 
 board1.appendChild(rank);
 board1.appendChild(name);
 board1.appendChild(Sscore);
 document.querySelector(".board").appendChild(board1);
+})  
+}
+
+// let scoreList =[];
+function updateRank() {
+    for( let i =0 ; i <gameArray.length ; i++){
+        for(let j = i ; j < gameArray.length ; j ++ ){
+            if(gameArray[j].score > gameArray[i].score ){
+                let temp = gameArray[i];
+                gameArray[i] = gameArray[j];
+                gameArray[j] = temp;
+            }
+        }
+    }
+    let rank1 = 0;
+    gameArray.forEach( g => {
+        (g.rk.parentNode).style.order = rank1++;
+        g.rk.innerHTML = rank1;
+        console.log(rank1);
+    })
+}
+
+let border = true;
+function blink (){
+ setInterval(()=> {
+    if(border){
+        (gameData.id.parentNode).style.border = "2px";
+        border =false;
+    }
+    else {
+        (gameData.id.parentNode).style.border = "2px solid black";
+        border =true;
+    }
+} ,500);
 }
 
 canvas.addEventListener("mousemove", e => {
+    if(!pause){
     mousePos = {
         x: e.clientX - canvas.offsetLeft,
         y: e.clientY - canvas.offsetTop
     }
+}
 });
 
 canvas.addEventListener("mousedown", (e) => {
+    if(!pause){
     const clickX = e.clientX;
     const clickY = e.clientY;
     if (player.checkIfClicked(clickX, clickY)) {
         console.log("Clickable box clicked!"); 
         createBox();
     }
+}
   });
+
 
 function createBox() {
     if(playerFacing == "right"){
@@ -818,3 +884,29 @@ function createBox() {
         }));
     }
 }
+
+function drawBackground() {
+    c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height );
+}
+
+function storeArray() {
+    const stringArray = JSON.stringify(gameArray);
+    localStorage.setItem("gameArray", stringArray);
+  }
+
+  function fetchArray() {
+    const retrievedString = localStorage.getItem("gameArray");
+    if (retrievedString) {
+      const FetchedArray = JSON.parse(retrievedString);
+      return FetchedArray;
+    } else {
+      console.log("No array found");
+      const FetchedArray = [];
+      return FetchedArray;
+    }
+  }
+
+  // random values
+function numBtw(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }  
