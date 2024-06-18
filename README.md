@@ -9,7 +9,7 @@
 1. ~~create one zombie and a player~~
 2. ~~move character~~
 3. ~~gravity~~
-4. other required concepts 
+4. ~~collission~~
 5. ~~score~~
 6. ~~pause,play~~
 7. leaderboard
@@ -17,3 +17,5 @@
 - ⁠~~i believe ability to place blocks is missing~~
 - ~~⁠have health bars for all player, zombies, blocks.~~
 - ~~⁠also blocks need to be destroyed by nearby zombie~~
+- ~~ Game over~~
+- normal mode completed ?

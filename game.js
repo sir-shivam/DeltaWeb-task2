@@ -192,18 +192,20 @@ class blocks {
         this.draw();
         this.position.x += this.velocity.x;
         const isColliding = this.checkForCollision();
-        if (isColliding) {
-
-        this.touch.velocity.y = 0; 
-        } else {
-        this.position.y += this.velocity.y;
-        if (this.position.y + this.height + this.velocity.y >= canvas.height - 100) {
-        this.velocity.y = 0; 
-        } else {
-        this.velocity.y += gravity; 
+            if (this.position.y + this.height + this.velocity.y >= canvas.height - 100) {
+            this.velocity.y = 0; 
+            } else {
+            this.velocity.y += gravity; 
+            }
+            if (isColliding) {
+            console.log(this.position.y);
+            if(this.position.y < this.touch.position.y){
+            this.velocity.y = 0;
+            }
         }
-    }
-    }
+            this.position.y += this.velocity.y;
+
+        }
 
     checkForCollision() {
     for (let i = 0; i < blockss.length; i++) {
@@ -532,9 +534,6 @@ function animate (){
         }
         jom.move();
     })
-
-
-
 }
     
 animate();
