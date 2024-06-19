@@ -8,6 +8,8 @@ backgroundImage.src='./Assets/images/background.jpeg';
 
 const gunImage=new Image();
 gunImage.src='./Assets/images/gun.png';
+const gunImage1=new Image();
+gunImage1.src='./Assets/images/gun1.png';
 
 const axeImage = new Image();
 axeImage.src = './Assets/images/axe.png';
@@ -32,6 +34,8 @@ let gameData;
 let gameArray = [];
 let gameScore = [];
 let score = 0;
+let gameOver = false;
+let post;
 
 const startButton = document.querySelector('.enter');
 const playerNameInput = document.getElementById('playerName');
@@ -203,9 +207,24 @@ class gun {
     draw(){
         c.save();
         c.translate(this.pivote.x, this.pivote.y)
+        if((this.rotationAngle >  30* Math.PI /180 && this.rotationAngle < 140*Math.PI / 180)){
+            if(this.rotationAngle >  30* Math.PI /180 && this.rotationAngle < 90*Math.PI / 180 ){
+                this.rotationAngle =  30* Math.PI /180
+            }
+            else{
+                this.rotationAngle =  140 * Math.PI /180;
+            }
+        }
         c.rotate(this.rotationAngle);
         c.translate(-this.pivote.x, -this.pivote.y);
-        c.drawImage(gunImage,this.position.x, this.position.y, this.width, this.height)
+        if((this.rotationAngle < -90* Math.PI /180 && this.rotationAngle > -Math.PI) || (this.rotationAngle < Math.PI &&  this.rotationAngle >90* Math.PI /180)){
+            c.drawImage(gunImage1,this.position.x, this.position.y, this.width, this.height)
+            post = "left";
+        }
+        else{
+        c.drawImage(gunImage,this.position.x, this.position.y, this.width, this.height);
+        post = "right";
+        }
         c.restore();
         
         bullets.forEach( bullet => {
@@ -333,6 +352,8 @@ class jombie {
                     if(player.healthBar.width <=0){
                         console.log("game over");
                         alert("game over");
+                        gameOver = true;
+                        window.location.reload();
                     }
                 }
                 else {blockss[num].healthBar.width -= 10;
@@ -470,8 +491,9 @@ const keys = {
 }
 
 function animate (){
-    if (!pause){
-    window.requestAnimationFrame(animate);}
+    if (!pause || !gameOver){
+    window.requestAnimationFrame(animate);
+    }
     c.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
     player.update();
@@ -509,17 +531,25 @@ animate();
 setTimeout(()=> {
     let interval1 = setInterval(() => {
         if(!pause){
-            jombieArrival();
+            // jombieArrival();
         }
     }, 5000);
 },1000);
 
 function fireBullet() {
     if(!pause){
-    distance = 2 + gun1.width;
+    distance = -35 + gun1.width;
     let angle = gun1.rotationAngle;
-    let delX = distance * Math.cos(angle + 0.05);
-    let delY = distance * Math.sin(angle + 0.05);
+    let delX;
+    let delY;
+    if(post=="left"){
+        delY = distance * Math.sin(angle + 28* Math.PI / 180);
+        delX = distance * Math.cos(angle + 28* Math.PI / 180);
+    }
+    else{
+        delX = distance * Math.cos(angle + 0.05);
+        delY = distance * Math.sin(angle + 0.05);
+    }
     let bulletX = gun1.pivote.x + delX;
     let bulletY = gun1.pivote.y + delY;
     bullets.push(new bullet(bulletX, bulletY, angle))
