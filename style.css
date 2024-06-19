@@ -231,3 +231,49 @@ canvas{
 
 }
 
+.info {
+    position: absolute;
+    width: 60vw;
+    height: 60vh;
+    border-radius: 1rem;
+    border: 2px solid black;
+    margin-left: 300px;
+    margin-top: 98vh;
+    z-index: 6;
+    background: linear-gradient(to left bottom, #6153cc, #80ed99); 
+}
+
+.info1{
+    text-align: center;
+    height: 40px;
+    align-content: center;
+    width: 210px;
+    border: 2px solid rgb(84, 4, 84);
+    margin-top: 5px;
+    margin-left: 42%;
+    border-radius: 0.8rem;
+}
+
+.info2 {
+    margin-left: 50px;
+    font-size: larger;
+}
+
+  
+.info2 p::before {
+    content: "•"; 
+    margin-right: 10px; 
+    font-size: 1.2rem; 
+    color: blue; 
+  }
+
+  .info0{
+    position: absolute;
+    margin-left: 52%;
+    margin-top:-2%;
+    /* width: 50px; */
+    /* height: 50px; */
+    /* z-index: 7; */
+    color: white;
+    font-size: 35px;
+  }

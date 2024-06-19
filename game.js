@@ -26,7 +26,7 @@ enemy.src='./Assets/images/jombie.png';
 const enemy1 = new Image();
 enemy1.src='./Assets/images/jombie1.png';
 
-let gameStart = true;
+let gameStart = false;
 let playerRank = 1;
 let gameData;
 let gameArray = [];
@@ -46,47 +46,7 @@ setTimeout(() => {
     pause = true; 
   }, 2000);
 
-  startButton.addEventListener('click', function() {
-  const playerName = playerNameInput.value.trim();
-  const nickName = nickNameInput.value.trim();
-
-  if (playerName === '' || nickName === '') {
-    alert('Please enter both your name and nick-name to start the game!');
-    return; 
-  }
-
-gameData = {
-    playerName: playerName,
-    nickName: nickName,
-    score: score,
-    id : null,
-    rk: null
-  };
-
-gameArray.push(gameData);
-storeArray();
-console.log(gameArray);
-
-          const toast = document.createElement('div');
-          toast.classList.add('toast'); 
-          toast.textContent = `Welcome, ${gameData.playerName} !`;
-          document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove(); 
-  }, 3000);
-
-  pause = false;
-  animate();
-  
-  createBoard();
-  (gameData.rk.parentNode).style.background=  `linear-gradient(to top, #30ce7d 0%, #fcfcff 100%)`;
-  blink();
-  const start = document.querySelector(".start");
-  start.style.display = "none";
-  gameStart = true;
-  console.log('Game starting with:', gameData);
-});
+startButton.addEventListener('click', startGame);
 
 let c = canvas.getContext("2d");
 let gravity = 0.999;
@@ -219,8 +179,8 @@ class blocks {
     for (let i = 0; i < blockss.length; i++) {
       const otherBlock = blockss[i];
       if (otherBlock !== this && 
-          this.position.x + this.width > otherBlock.position.x &&
-          this.position.x < otherBlock.position.x + otherBlock.width &&
+          this.position.x + this.width -12 > otherBlock.position.x + 12&&
+          this.position.x + 12 < otherBlock.position.x + otherBlock.width -12 &&
           this.position.y + this.height > otherBlock.position.y &&
           this.position.y < otherBlock.position.y + otherBlock.height) {
             this.touch =blockss[i];
@@ -816,12 +776,17 @@ function updateRank() {
             }
         }
     }
-    let rank1 = 0;
+
+    let rank1 = 1;
     gameArray.forEach( g => {
-        (g.rk.parentNode).style.order = rank1++;
-        g.rk.innerHTML = rank1;
+        g.rank = rank1;
+        g.rk.innerHTML = rank1++;
         console.log(rank1);
     })
+
+    if(gameStart){
+        (gameData.id.parentNode).style.order = gameData.rank - 1;
+    }
 }
 
 let border = true;
@@ -907,6 +872,53 @@ function storeArray() {
   }
 
   // random values
-function numBtw(min, max) {
+    function numBtw(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
-  }  
+  }
+
+  document.querySelector(".info0").addEventListener("click" , ()=> {
+    document.querySelector(".info").style.display = "none";
+  })
+
+  // game start function
+  function startGame() {
+    const playerName = playerNameInput.value.trim();
+    const nickName = nickNameInput.value.trim();
+  
+    if (playerName === '' || nickName === '') {
+      alert('Please enter both your name and nick-name to start the game!');
+      return; 
+    }
+  
+  gameData = {
+      playerName: playerName,
+      nickName: nickName,
+      score: score,
+      id : null,
+      rk: null
+    };
+  
+  gameArray.push(gameData);
+  storeArray();
+  console.log(gameArray);
+  
+            const toast = document.createElement('div');
+            toast.classList.add('toast'); 
+            toast.textContent = `Welcome, ${gameData.playerName} !`;
+            document.body.appendChild(toast);
+  
+    setTimeout(() => {
+      toast.remove(); 
+    }, 3000);
+  
+    pause = false;
+    animate();
+    createBoard();
+    updateRank();
+    (gameData.rk.parentNode).style.background=  `linear-gradient(to top, #30ce7d 0%, #fcfcff 100%)`;
+    blink();
+    const start = document.querySelector(".start");
+    start.style.display = "none";
+    gameStart = true;
+    console.log('Game starting with:', gameData);
+  }
