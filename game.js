@@ -531,7 +531,7 @@ animate();
 setTimeout(()=> {
     let interval1 = setInterval(() => {
         if(!pause){
-            // jombieArrival();
+            jombieArrival();
         }
     }, 5000);
 },1000);
@@ -757,6 +757,7 @@ leader.addEventListener("click" , ()=> {
         board.style.display = "block";
         isOn = true;
         pause = true;
+        play.innerHTML=`<i class="fa-solid fa-play"></i>`;
         document.querySelector(".sticker").style.display = "block";
     }
     else {
@@ -764,6 +765,8 @@ leader.addEventListener("click" , ()=> {
         isOn = false;
         pause = false;
         document.querySelector(".sticker").style.display = "none";
+        play.innerHTML=`<i class="fa-solid fa-pause"></i>`;
+        animate();
     }
 
 })
