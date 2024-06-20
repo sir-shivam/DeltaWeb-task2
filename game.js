@@ -34,7 +34,7 @@ let gameData;
 let gameArray = [];
 let gameScore = [];
 let score = 0;
-let gameOver = false;
+// let gameOver = false;
 let post;
 
 const startButton = document.querySelector('.enter');
@@ -352,7 +352,7 @@ class jombie {
                     if(player.healthBar.width <=0){
                         console.log("game over");
                         alert("game over");
-                        gameOver = true;
+                        // gameOver = true;
                         window.location.reload();
                     }
                 }
@@ -491,7 +491,7 @@ const keys = {
 }
 
 function animate (){
-    if (!pause || !gameOver){
+    if (!pause){
     window.requestAnimationFrame(animate);
     }
     c.clearRect(0, 0, canvas.width, canvas.height);
@@ -538,13 +538,13 @@ setTimeout(()=> {
 
 function fireBullet() {
     if(!pause){
-    distance = -35 + gun1.width;
+    distance = -10 + gun1.width;
     let angle = gun1.rotationAngle;
     let delX;
     let delY;
     if(post=="left"){
-        delY = distance * Math.sin(angle + 28* Math.PI / 180);
-        delX = distance * Math.cos(angle + 28* Math.PI / 180);
+        delY = distance * Math.sin(angle + 20* Math.PI / 180);
+        delX = distance * Math.cos(angle + 20* Math.PI / 180);
     }
     else{
         delX = distance * Math.cos(angle + 0.05);
