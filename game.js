@@ -28,21 +28,34 @@ enemy.src='./Assets/images/jombie.png';
 const enemy1 = new Image();
 enemy1.src='./Assets/images/jombie1.png';
 
+const starImg = new Image();
+starImg.src='./Assets/images/star.png';
+
+const bandImg = new Image();
+bandImg.src='./Assets/images/band.png';
+
+const immuneImg = new Image();
+immuneImg.src='./Assets/images/immune.png';
+
+
 let gameStart = false;
 let playerRank = 1;
 let gameData;
 let gameArray = [];
 let gameScore = [];
 let score = 0;
-// let gameOver = false;
+let count = 0;
 let post;
+let stars = [];
+let bands = [];
+let immuneArray = [];
 
 const startButton = document.querySelector('.enter');
 const playerNameInput = document.getElementById('playerName');
 const nickNameInput = document.getElementById('nickName');
 let pause = false;
 
-// storeArray();
+storeArray();
 gameArray = fetchArray();
 console.log(gameArray);
 
@@ -100,8 +113,12 @@ class character {
     draw() {
         c.drawImage(boy,this.position.x , this.position.y ,this.width, this.height);
         c.drawImage(stone,this.square.position.x, this.square.position.y - 40 , this.square.width, this.square.height )
+        if(this.healthBar.width > 100){
+            c.fillStyle = "blue";
+            c.fillRect(this.healthBar.position.x + 10, this.healthBar.position.y - 10, 100, this.healthBar.height);
+        }
         c.fillStyle = "green";
-        c.fillRect(this.healthBar.position.x + 10, this.healthBar.position.y - 10, this.healthBar.width, this.healthBar.height)
+        c.fillRect(this.healthBar.position.x + 10, this.healthBar.position.y - 10, this.healthBar.width, this.healthBar.height);
         c.lineWidth= 0.3;  
         c.strokeStyle= "dark green";  
         c.strokeRect(this.healthBar.position.x + 10, this.healthBar.position.y - 10, 100 , this.healthBar.height);
@@ -396,18 +413,6 @@ class jombie {
     }    
 }   
 
-const jombie1 = new jombie({
-    position: {
-        x: Math.random()*200,
-        y: Math.random()*300
-    },
-    velocity: {
-        x: 0.2,
-        y: 0
-    }
-}
-);
-
 let i=0;
 class bullet {
     constructor(x, y, angle) {
@@ -429,6 +434,82 @@ class bullet {
     draw() {
         c.fillStyle = 'black';
         c.fillRect(this.x - 2, this.y - 2, 10, 10);
+    }
+}
+
+// after killing a jombie
+class star {
+    constructor({position, velocity}){
+        this.position = position;
+        this.velocity=velocity;
+        this.width = 30;
+        this.height = 30;
+        this.type = "star";
+    }
+
+    draw(){
+        c.fillStyle = "green";
+        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        c.drawImage(starImg,this.position.x, this.position.y, this.width, this.height)
+    }
+
+    update(){
+
+        if(this.position.y < 150){
+            this.velocity.y = 0
+        };
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+        this.draw();
+    }
+}
+
+class firstAid{
+    constructor({position, velocity}){
+        this.position = position;
+        this.velocity=velocity;
+        this.width = 20;
+        this.height = 20;
+        this.type = "firstAid";
+    }
+
+    draw(){
+        // c.fillStyle = "red";
+        c.drawImage(bandImg,this.position.x, this.position.y, this.width, this.height);
+        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
+
+    update(){
+        if(this.position.y < 150){
+            this.velocity.y = 0
+        };
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+        this.draw();
+    }
+}
+
+class extraImmunity {
+    constructor({position, velocity}){
+        this.position = position;
+        this.velocity=velocity;
+        this.width = 20;
+        this.height = 20;
+        this.type = "immunity";
+    }
+    
+    draw(){
+        // c.fillStyle = "black";
+        // c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        c.drawImage(immuneImg,this.position.x, this.position.y, this.width, this.height);   
+    }
+    update(){
+        if(this.position.y < 150){
+            this.velocity.y = 0
+        };
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+        this.draw();
     }
 }
 
@@ -524,6 +605,8 @@ function animate (){
         }
         jom.move();
     })
+
+    next();
 }
     
 animate();
@@ -639,6 +722,18 @@ function hit (bullet){
             bullets.splice(i, 1);
             jombies[jom2].healthBar.width -= 8;
             if(jombies[jom2].healthBar.width  <= 0){
+            if(player.healthBar.width < 100){
+                if(count%5 == 0){
+                    createBandage(jombies[jom2]);
+                }
+            }
+            else if(count%8 == 0 && score > 200){
+                createImunity(jombies[jom2]);
+            }
+            else{
+            createStar(jombies[jom2]);
+            }
+            count++;
             jombies.splice(jom2,1);
             }
             score += 10;
@@ -814,7 +909,7 @@ function updateRank() {
     gameArray.forEach( g => {
         g.rank = rank1;
         g.rk.innerHTML = rank1++;
-        console.log(rank1);
+        // console.log(rank1);
     })
 
     if(gameStart){
@@ -955,3 +1050,121 @@ function storeArray() {
     gameStart = true;
     console.log('Game starting with:', gameData);
   }
+
+  function next(){
+    stars.forEach( (s , z) => {
+        s.update();
+        uniCheck(s, stars , z);
+    })
+    bands.forEach( (b,z)=> {
+        b.update();
+        uniCheck(b, bands , z);
+    })
+
+    immuneArray.forEach((i,z) => {
+        i.update();
+        uniCheck(i, immuneArray , z);
+    })
+  }
+
+  function createStar (j){
+    let position = {
+        x: j.position.x,
+        y: j.position.y
+    }
+    let velocity;
+    if (j.pos == "right"){
+        velocity = {
+            x: -1,
+            y: -1
+        }
+    }
+    else {
+        velocity={
+            x: 1,
+            y: -1
+        }
+    }
+    stars.push(new star({position, velocity}));
+  }
+
+  function createBandage(j){
+    let position = {
+        x: j.position.x,
+        y: j.position.y
+    }
+    let velocity;
+    if (j.pos == "right"){
+        velocity = {
+            x: -1,
+            y: -1
+        }
+    }
+    else {
+        velocity={
+            x: 1,
+            y: -1
+        }
+    }
+    stars.push(new firstAid({position, velocity}));
+  }
+
+  function createImunity(j){
+    let position = {
+        x: j.position.x,
+        y: j.position.y
+    }
+    let velocity;
+    if (j.pos == "right"){
+        velocity = {
+            x: -1,
+            y: -1
+        }
+    }
+    else {
+        velocity={
+            x: 1,
+            y: -1
+        }
+    }
+    immuneArray.push(new extraImmunity({position, velocity}));
+  }
+  
+  function universalCollide(object){
+    return (
+        player.position.x + 20 < object.position.x + object.width &&
+        player.position.x + player.width -20 > object.position.x &&
+        player.position.y + 2 < object.position.y + object.height &&
+        player.position.y + player.height > object.position.y 
+        )  ;
+  } 
+
+function uniCheck(e , array , z){
+
+    if(universalCollide(e)){
+        console.log(e.type);
+        array.splice(z,1);
+        if(e.type =="star"){
+            score += 2;
+            gameArray.forEach(g => {
+                if(g == gameData){
+                    g.score += 2;
+                    gameData = g;
+                    storeArray();
+                    (g.id).innerHTML = score;
+                    updateRank();
+                    return "done";
+                }
+            })
+        }
+        else if(e.type == "firstAid"){
+            if(player.healthBar.width < 100 ){
+                player.healthBar.width = 100;
+            }
+        }
+        else if(e.type == "immunity"){
+            player.healthBar.width = 150;
+        }
+    }
+    
+}

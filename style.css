@@ -232,6 +232,8 @@ canvas{
 }
 
 .info {
+    /* temporary */
+    display: none;
     position: absolute;
     width: 60vw;
     height: 60vh;
